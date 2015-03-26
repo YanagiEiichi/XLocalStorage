@@ -1,7 +1,7 @@
 var xLocalStorage = new function() {
   var heap = [ null ];
   // TODO: This regexp can't support extension locale domain such as *.com.xx
-  var root = document.origin.replace(/\/\/.*?(?=[^.\d]+\.[^.\d]+$)/, '//');
+  var root = location.protocol + '//' + location.host.replace(/^.*?(?=[^.\d]+\.[^.\d]+$)/, '');
 
   // Install iframe to document head
   var head = document.documentElement.firstChild;
@@ -20,7 +20,7 @@ var xLocalStorage = new function() {
     var holder = proxy.holder;
     proxy = iframe.contentWindow;
     for(var i = 0; i < holder.length; i++) {
-      proxy.postMessage.apply(proxy, holder[i]);
+      proxy.postMessage(holder[i][0], holder[i][1]);
     }
   };
  
@@ -35,6 +35,7 @@ var xLocalStorage = new function() {
       for(var i = 0; i < deferList.length; i++) {
         deferList[i].call(null, result);
       }
+      deferList = null;
     });
 
     // Actually post message
@@ -71,7 +72,6 @@ var xLocalStorage = new function() {
 
   // Set message listener
   var onmessage = function(message) {
-    message = message || event;
     var origin = message.origin;
 
     // Permission checking

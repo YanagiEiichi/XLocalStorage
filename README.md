@@ -4,7 +4,7 @@
 
 #### Usage
 
-First, you should put the xlocalstorage.html to your root domain and root path.
+First, you should copy the `xlocalstorage.html` to your root domain and root path.
 
 ```html
 <script src="bower_components/xlocalstorage/xlocalstorage.js"></script>

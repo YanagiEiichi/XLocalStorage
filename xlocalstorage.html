@@ -1,12 +1,11 @@
 <script>
 // Set message listener
 onmessage = function(message) {
-  message = message || event;
   // TODO: This regexp can't support extension locale domain such as *.com.xx
   var root = message.origin.replace(/\/\/.*?(?=[^.\d]+\.[^.\d]+$)/, '//');
 
   // Permission checking
-  if(document.origin !== root) throw new Error('Permission Denied');
+  if(location.protocol + '//' + location.host !== root) throw new Error('Permission Denied');
 
   // Parse JSON-RPC 2.0
   var frame = JSON.parse(message.data);
@@ -17,7 +16,7 @@ onmessage = function(message) {
  
   // Proccess origin localStorage
   var result = localStorage[names[1]];
-  if(typeof result === 'function') {
+  if(result && result.apply) {
     result = result.apply(localStorage, frame.params);
   }
 
