@@ -25,43 +25,37 @@ void function() {
     }
   };
 
+  // Simple Promise
+  var SimplePromise = function(resolver) {
+    var queue = [];
+    var result;
+    resolver(function($result) {
+      if(!queue) return;
+      result = $result;
+      for(var i = 0; i < queue.length; i++) {
+        queue[i].call(null, result);
+      } 
+      queue = null;
+    });
+    this.then = function(callback) {
+      queue ? queue.push(callback) : callback(result);
+    }
+  };
+
   // Post message and return a thenable object
   var postMessage = function(method, params) {
-    var deferList = [];
-    var result;
-
-    // Set complete handler
-    heap.push(function(e) {
-      result = e;
-      for(var i = 0; i < deferList.length; i++) {
-        deferList[i].call(null, result);
-      }
-      deferList = null;
+    return new interface.Promise(function(resolve) {
+      proxy.postMessage(JSON.stringify({
+        jsonrpc: '2.0',
+        method: NAME + '.' + method,
+        params: params,
+        id: heap.push(resolve) - 1
+      }), root);
     });
-
-    // Actually post message
-    proxy.postMessage(JSON.stringify({
-      jsonrpc: '2.0',
-      method: NAME + '.' + method,
-      params: params,
-      id: heap.length - 1
-    }), root);
-
-    // Return a thenable object
-    return {
-      then: function(callback) {
-        if(deferList) {
-          deferList.push(callback);
-        } else {
-          callback(result);
-        }
-        return this;
-      }
-    };
   };
 
   // Build Methods
-  var interface = {};
+  var interface = { Promise: window.Promise || SimplePromise };
   var buildMethod = function(base, name) {
     base[name] = function() {
       return postMessage(name, Array.prototype.slice.call(arguments));
