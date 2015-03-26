@@ -24,6 +24,7 @@ void function() {
     });
     this.then = function(callback) {
       queue ? queue.push(callback) : callback(result);
+      return this;
     }
   };
 
@@ -41,7 +42,10 @@ void function() {
 
   // Post message and return a thenable object
   var postMessage = function(method, params) {
-    return new interface.Promise(function(resolve) {
+    if(typeof params[params.length - 1] === 'function') {
+      var inlineCallback = params.pop();
+    }
+    var promise = new interface.Promise(function(resolve) {
       proxy.postMessage(JSON.stringify({
         jsonrpc: '2.0',
         method: NAME + '.' + method,
@@ -49,6 +53,8 @@ void function() {
         id: heap.push(resolve) - 1
       }), root);
     });
+    promise.then(inlineCallback);
+    return promise;
   };
 
   // Build Methods
