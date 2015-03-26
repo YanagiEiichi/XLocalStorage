@@ -1,4 +1,5 @@
-var xLocalStorage = new function() {
+void function() {
+  var NAME = 'xLocalStorage';
   var heap = [ null ];
   // TODO: This regexp can't support extension locale domain such as *.com.xx
   var root = location.protocol + '//' + location.host.replace(/^.*?(?=[^.\d]+\.[^.\d]+$)/, '');
@@ -6,7 +7,7 @@ var xLocalStorage = new function() {
   // Install iframe to document head
   var head = document.documentElement.firstChild;
   var iframe = document.createElement('iframe');
-  iframe.src = root + '/xlocalstorage.html';
+  iframe.src = root + '/' + NAME.toLowerCase() + '.html';
   head.insertBefore(iframe, head.firstChild);
 
   // Promise for iframe.onload
@@ -23,7 +24,7 @@ var xLocalStorage = new function() {
       proxy.postMessage(holder[i][0], holder[i][1]);
     }
   };
- 
+
   // Post message and return a thenable object
   var postMessage = function(method, params) {
     var deferList = [];
@@ -41,7 +42,7 @@ var xLocalStorage = new function() {
     // Actually post message
     proxy.postMessage(JSON.stringify({
       jsonrpc: '2.0',
-      method: 'xLocalStorage.' + method,
+      method: NAME + '.' + method,
       params: params,
       id: heap.length - 1
     }), root);
@@ -60,6 +61,7 @@ var xLocalStorage = new function() {
   };
 
   // Build Methods
+  var interface = {};
   var buildMethod = function(base, name) {
     base[name] = function() {
       return postMessage(name, Array.prototype.slice.call(arguments));
@@ -67,7 +69,7 @@ var xLocalStorage = new function() {
   };
   var methods = [ 'setItem', 'getItem', 'removeItem', 'clear', 'key', 'length' ];
   for(var i = 0; i < methods.length; i++) {
-    buildMethod(this, methods[i]);
+    buildMethod(interface, methods[i]);
   }
 
   // Set message listener
@@ -82,7 +84,7 @@ var xLocalStorage = new function() {
     if(frame.jsonrpc != '2.0') return;
     if(frame.params) return;
     var names = frame.method ? frame.method.split('.') : [];
-    if(names[0] !== 'xLocalStorage') return;
+    if(names[0] !== NAME) return;
 
     // Call the handler function
     heap[frame.id](frame.result);
@@ -93,5 +95,15 @@ var xLocalStorage = new function() {
   } else if(window.attachEvent) {
     attachEvent('onmessage', onmessage);
   }
-};
+
+  switch(true) {
+    case typeof define === 'function' && !!define.amd: // For AMD
+      return define(function() { return interface; });
+    case typeof angular === 'object' && !!angular.version: // For Angular
+      return angular.module('ng').factory(NAME, function() { return interface; });
+    default: // For Global and compatible with IE8
+      -[1,] || execScript('var ' + NAME);
+      window[NAME] = interface;
+  }
+}();
 
