@@ -11,7 +11,7 @@ First, you should put the xlocalstorage.html to your root domain and root path.
 <script>
 // WARN: The returned object is a thenable object not a ES6 Promise
 xLocalStorage.setItem('abc', 123).then(function(e) {
-  xLocalStorage.getItem('abc').then)function(e) {
+  xLocalStorage.getItem('abc').then(function(e) {
     console.log(e); // 123
   });
 });
