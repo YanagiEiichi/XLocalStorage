@@ -1,0 +1,24 @@
+<html ng-app="app">
+<script src="bower_components/requirejs/require.js"></script>
+<script>
+require(['../xlocalstorage.js'], function(xLocalStorage) {
+  var result = [];
+  xLocalStorage.clear().then(function(e) {
+    xLocalStorage.setItem('abc', 123).then(function(e) {
+      xLocalStorage.getItem('abc').then(function(e) {
+        if(e === '123') result.push(1);
+        xLocalStorage.length().then(function(e) {
+          if(e === 1) result.push(2);
+          xLocalStorage.removeItem('abc').then(function(e) {
+            xLocalStorage.length().then(function(e) {
+              if(e === 0) result.push(3);
+              console.log(result, 'done');
+            });
+          });
+        });
+      });
+    });
+  });
+});
+</script>
+
