@@ -1,0 +1,25 @@
+{
+  "name": "XLocalStorage",
+  "main": "XLocalStorage.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/YanagiEiichi/XLocalStorage",
+  "authors": [
+    "YanagiEiichi <admin@web-tinker.com>"
+  ],
+  "description": "Cross subdomain localStorage (base on JSON-RPC 2.0 protocol)",
+  "keywords": [
+    "localStorage",
+    "Cross",
+    "Origin",
+    "Cross",
+    "Domain"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
