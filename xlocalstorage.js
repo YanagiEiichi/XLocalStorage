@@ -10,21 +10,6 @@ void function() {
   iframe.src = root + '/' + NAME.toLowerCase() + '.html';
   head.insertBefore(iframe, head.firstChild);
 
-  // Promise for iframe.onload
-  var proxy = {
-    holder: [],
-    postMessage: function() {
-      this.holder.push(arguments);
-    }
-  };
-  iframe.onload = function() {
-    var holder = proxy.holder;
-    proxy = iframe.contentWindow;
-    for(var i = 0; i < holder.length; i++) {
-      proxy.postMessage(holder[i][0], holder[i][1]);
-    }
-  };
-
   // Simple Promise
   var SimplePromise = function(resolver) {
     var queue = [];
@@ -39,6 +24,18 @@ void function() {
     });
     this.then = function(callback) {
       queue ? queue.push(callback) : callback(result);
+    }
+  };
+
+  // Promise for iframe.onload
+  var proxy = {
+    holder: new SimplePromise(function(resolve) {
+      iframe.onload = resolve;
+    }),
+    postMessage: function(data, origin) {
+      this.holder.then(function() {
+        iframe.contentWindow.postMessage(data, origin);
+      });
     }
   };
 
