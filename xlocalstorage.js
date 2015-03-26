@@ -94,7 +94,14 @@ void function() {
     case typeof define === 'function' && !!define.amd: // For AMD
       return define(function() { return interface; });
     case typeof angular === 'object' && !!angular.version: // For Angular
-      return angular.module('ng').factory(NAME, function() { return interface; });
+      return angular.module('ng').factory(NAME, ['$q', function($q) {
+        interface.Promise = function(resolver) {
+          var defer = $q.defer();
+          resolver(defer.resolve, defer.reject);
+          return defer.promise;
+        };
+        return interface;
+      }]);
     default: // For Global and compatible with IE8
       -[1,] || execScript('var ' + NAME);
       window[NAME] = interface;
