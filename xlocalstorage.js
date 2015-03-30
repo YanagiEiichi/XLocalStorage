@@ -114,7 +114,7 @@ void function() {
     case typeof define === 'function' && !!define.amd: // For AMD
       return define(function() { return interface; });
     case typeof angular === 'object' && !!angular.version: // For Angular
-      return angular.module('ng').factory(NAME, ['$q', function($q) {
+      return angular.module('xLocalStorage', []).factory(NAME, ['$q', function($q) {
         interface.Promise = function(resolver) {
           var defer = $q.defer();
           resolver(defer.resolve, defer.reject);

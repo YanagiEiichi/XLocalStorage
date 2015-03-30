@@ -2,7 +2,9 @@
 <script src="bower_components/angular/angular.min.js"></script>
 <script src="../xlocalstorage.js"></script>
 <script>
-angular.module('app', []).run(['xLocalStorage', function(xLocalStorage) {
+angular.module('app', [
+  'xLocalStorage'
+]).run(['xLocalStorage', function(xLocalStorage) {
   var result = [];
   xLocalStorage.clear().then(function(e) {
     return xLocalStorage.setItem('abc', 123);
