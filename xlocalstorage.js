@@ -1,4 +1,6 @@
 void function() {
+  'use strict';
+
   var NAME = 'xLocalStorage';
   var heap = [ null ];
 
@@ -29,20 +31,16 @@ void function() {
 
   // Simple Promise
   var SimplePromise = function(resolver) {
-    var queue = [];
-    var result;
+    var handler, result, isResolved;
     resolver(function($result) {
-      if(!queue) return;
+      isResolved = true;
       result = $result;
-      for(var i = 0; i < queue.length; i++) {
-        queue[i].call(null, result);
-      } 
-      queue = null;
+      if(handler) handler(result);
     });
     this.then = function(callback) {
-      queue ? queue.push(callback) : callback(result);
-      return this;
-    }
+      if(isResolved) return callback(result);
+      handler = callback;
+    };
   };
 
   // Promise for iframe.onload
@@ -62,7 +60,7 @@ void function() {
     if(typeof params[params.length - 1] === 'function') {
       var inlineCallback = params.pop();
     }
-    var promise = new interface.Promise(function(resolve) {
+    var promise = new xlocalstorage.Promise(function(resolve) {
       proxy.postMessage(JSON.stringify({
         jsonrpc: '2.0',
         method: NAME + '.' + method,
@@ -71,11 +69,12 @@ void function() {
       }), root);
     });
     promise.then(inlineCallback);
-    return promise;
+    // Don't return promise, because SimplePromise is not standard
+    return promise instanceof SimplePromise ? void 0 : promise;
   };
 
   // Build Methods
-  var interface = { Promise: window.Promise || SimplePromise };
+  var xlocalstorage = { Promise: window.Promise || SimplePromise };
   var buildMethod = function(base, name) {
     base[name] = function() {
       return postMessage(name, Array.prototype.slice.call(arguments));
@@ -83,7 +82,7 @@ void function() {
   };
   var methods = [ 'setItem', 'getItem', 'removeItem', 'clear', 'key', 'length' ];
   for(var i = 0; i < methods.length; i++) {
-    buildMethod(interface, methods[i]);
+    buildMethod(xlocalstorage, methods[i]);
   }
 
   // Set message listener
@@ -105,26 +104,27 @@ void function() {
     heap[frame.id] = null;
   };
   if(window.addEventListener) {
-    addEventListener('message', onmessage)
+    addEventListener('message', onmessage);
   } else if(window.attachEvent) {
     attachEvent('onmessage', onmessage);
   }
 
   switch(true) {
     case typeof define === 'function' && !!define.amd: // For AMD
-      return define(function() { return interface; });
+      return define(function() { return xlocalstorage; });
     case typeof angular === 'object' && !!angular.version: // For Angular
       return angular.module('xLocalStorage', []).factory(NAME, ['$q', function($q) {
-        interface.Promise = function(resolver) {
+        xlocalstorage.Promise = function(resolver) {
           var defer = $q.defer();
           resolver(defer.resolve, defer.reject);
           return defer.promise;
         };
-        return interface;
+        return xlocalstorage;
       }]);
     default: // For Global and compatible with IE8
       -[1,] || execScript('var ' + NAME);
-      window[NAME] = interface;
+      window[NAME] = xlocalstorage;
   }
 }();
+
 
