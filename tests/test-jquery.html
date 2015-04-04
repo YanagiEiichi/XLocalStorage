@@ -1,0 +1,24 @@
+<html ng-app="app">
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="../xlocalstorage.js"></script>
+<script>
+var result = [];
+
+$.xLocalStorage.clear().then(function(e) {
+  return $.xLocalStorage.setItem('abc', 123);
+}).then(function(e) {
+  return $.xLocalStorage.getItem('abc');
+}).then(function(e) {
+  if(e === '123') result.push(1);
+  return $.xLocalStorage.length()
+}).then(function(e) {
+  if(e === 1) result.push(2);
+  return $.xLocalStorage.removeItem('abc')
+}).then(function(e) {
+  return $.xLocalStorage.length()
+}).then(function(e) {
+  if(e === 0) result.push(3);
+  console.log(result, 'done');
+});
+</script>
+

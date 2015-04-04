@@ -60,7 +60,7 @@ void function() {
     if(typeof params[params.length - 1] === 'function') {
       var inlineCallback = params.pop();
     }
-    var promise = new xlocalstorage.Promise(function(resolve) {
+    var promise = new xLocalStorage.Promise(function(resolve) {
       proxy.postMessage(JSON.stringify({
         jsonrpc: '2.0',
         method: NAME + '.' + method,
@@ -74,7 +74,7 @@ void function() {
   };
 
   // Build Methods
-  var xlocalstorage = { Promise: window.Promise || SimplePromise };
+  var xLocalStorage = { Promise: window.Promise || SimplePromise };
   var buildMethod = function(base, name) {
     base[name] = function() {
       return postMessage(name, Array.prototype.slice.call(arguments));
@@ -82,7 +82,7 @@ void function() {
   };
   var methods = [ 'setItem', 'getItem', 'removeItem', 'clear', 'key', 'length' ];
   for(var i = 0; i < methods.length; i++) {
-    buildMethod(xlocalstorage, methods[i]);
+    buildMethod(xLocalStorage, methods[i]);
   }
 
   // Set message listener
@@ -111,20 +111,27 @@ void function() {
 
   switch(true) {
     case typeof define === 'function' && !!define.amd: // For AMD
-      return define(function() { return xlocalstorage; });
+      return define(function() { return xLocalStorage; });
     case typeof angular === 'object' && !!angular.version: // For Angular
       return angular.module('xLocalStorage', []).factory(NAME, ['$q', function($q) {
-        xlocalstorage.Promise = function(resolver) {
+        xLocalStorage.Promise = function(resolver) {
           var defer = $q.defer();
           resolver(defer.resolve, defer.reject);
           return defer.promise;
         };
-        return xlocalstorage;
+        return xLocalStorage;
       }]);
+    case typeof jQuery === 'function' && typeof jQuery.Deferred === 'function': // For jQuery
+      xLocalStorage.Promise = function(resolver) {
+        var defer = new jQuery.Deferred;
+        resolver(defer.resolve, defer.reject);
+        return defer.promise();
+      };
+      jQuery.xLocalStorage = xLocalStorage;
+      break;
     default: // For Global and compatible with IE8
       -[1,] || execScript('var ' + NAME);
-      window[NAME] = xlocalstorage;
+      window[NAME] = xLocalStorage;
   }
 }();
-
 
