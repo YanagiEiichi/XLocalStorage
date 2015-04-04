@@ -25,26 +25,7 @@ xLocalStorage.setItem('abc', 123, function(e) {
 </script>
 ```
 
-##### Simple Promise Style
-
-```html
-<script src="bower_components/xlocalstorage/xlocalstorage.js"></script>
-<script>
-xLocalStorage.setItem('abc', 123).then(function(e) {
-  xLocalStorage.getItem('abc').then(function(e) {
-    console.log(e); // 123
-    xLocalStorage.length().then(function(e) {
-      console.log(e); // 1
-      xLocalStorage.key(0).then(function(e) {
-        console.log(e); // 'abc'
-      });
-    });
-  });
-});
-</script>
-```
-
-##### ES Promise Style (require ES6 or Angular)
+##### Promise Style (require ES6 or Angular or jQuery)
 
 ```html
 <script src="bower_components/xlocalstorage/xlocalstorage.js"></script>
