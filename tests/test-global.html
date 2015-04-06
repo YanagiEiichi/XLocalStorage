@@ -1,3 +1,4 @@
+<script src="bower_components/tester/tester.js"></script>
 <script src="../xlocalstorage.js"></script>
 <script>
 var result = [];
@@ -5,13 +6,13 @@ var result = [];
 xLocalStorage.clear(function(e) {
   xLocalStorage.setItem('abc', 123, function(e) {
     xLocalStorage.getItem('abc', function(e) {
-      if(e === '123') result.push(1);
+      if(e === '123') result.push(0);
       xLocalStorage.length(function(e) {
-        if(e === 1) result.push(2);
+        if(e === 1) result.push(1);
         xLocalStorage.removeItem('abc', function(e) {
           xLocalStorage.length(function(e) {
-            if(e === 0) result.push(3);
-            console.log(result, 'done');
+            if(e === 0) result.push(2);
+            Tester.feedback(result.every(function(i, e) { return i === e; }));
           });
         });
       });
